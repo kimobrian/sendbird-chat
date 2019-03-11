@@ -1,13 +1,13 @@
-import React, {Component} from "react";
-import {View} from "react-native";
-import {Input, Button, Text} from "react-native-elements";
-import SendBird from "sendbird";
-import {connect} from "react-redux";
-import {sendbirdLogin} from "../actions";
+import React, { Component } from "react";
+import { View } from "react-native";
+import { Input, Button, Text } from "react-native-elements";
+import { connect } from "react-redux";
+import { NavigationActions, StackActions } from "react-navigation";
+import { sendbirdLogin } from "../actions";
 
 class Login extends Component {
   static navigationOptions = {
-    title: "LOGIN"
+    title: "LOGIN",
   };
 
   constructor(props) {
@@ -15,39 +15,57 @@ class Login extends Component {
     this.state = {
       userId: "kimobrian254",
       nickname: "kimo",
-      error: ""
+      error: "",
     };
   }
 
+  // componentWillReceiveProps(props) {
+  //   const {user, error} = props;
+  //   if (user) {
+  //     this.setState({userId: "", nickname: ""}, () => {
+  //       this.props.navigation.navigate("Menu");
+  //     });
+  //   }
+  // }
+
   componentWillReceiveProps(props) {
-    const {user, error} = props;
+    const { user, error } = props;
+    if (error) {
+      this.setState({ error });
+      return;
+    }
     if (user) {
-      this.setState({userId: "", nickname: ""}, () => {
-        this.props.navigation.navigate("Menu");
+      const resetAction = StackActions.reset({
+        index: 0,
+        actions: [NavigationActions.navigate({ routeName: "Menu" })],
+      });
+      this.setState({ userId: "", nickname: "" }, () => {
+        this.props.navigation.dispatch(resetAction);
       });
     }
   }
 
-  _userIdChanged = userId => {
-    this.setState({userId});
+  _userIdChanged = (userId) => {
+    this.setState({ userId });
   };
 
-  _nicknameChanged = nickname => {
-    this.setState({nickname});
+  _nicknameChanged = (nickname) => {
+    this.setState({ nickname });
   };
+
   _onButtonPress = () => {
-    const {userId, nickname} = this.state;
-    this.props.sendbirdLogin({userId, nickname});
+    const { userId, nickname } = this.state;
+    this.props.sendbirdLogin({ userId, nickname });
   };
 
   render() {
     return (
-      <View style={{backgroundColor: "#fff", flex: 1}}>
+      <View style={{ backgroundColor: "#fff", flex: 1 }}>
         <View style={styles.containerStyle}>
           <Input
             label="User ID"
-            containerStyle={{width: 250}}
-            errorStyle={{color: "red"}}
+            containerStyle={{ width: 250 }}
+            errorStyle={{ color: "red" }}
             errorMessage={null}
             value={this.state.userId}
           />
@@ -55,8 +73,8 @@ class Login extends Component {
         <View style={styles.containerStyle}>
           <Input
             label="Nickname"
-            containerStyle={{width: 250}}
-            errorStyle={{color: "red"}}
+            containerStyle={{ width: 250 }}
+            errorStyle={{ color: "red" }}
             errorMessage={null}
             value={this.state.nickname}
           />
@@ -66,11 +84,11 @@ class Login extends Component {
             title="Connect"
             type="outline"
             onPress={this._onButtonPress}
-            containerStyle={{width: 250}}
+            containerStyle={{ width: 250 }}
           />
         </View>
         <View style={styles.containerStyle}>
-          <Text h1>{this.state.error}</Text>
+          <Text h5>{this.state.error}</Text>
         </View>
       </View>
     );
@@ -82,13 +100,13 @@ const styles = {
     marginTop: 10,
     flex: 1,
     justifyContent: "center",
-    alignItems: "center"
-  }
+    alignItems: "center",
+  },
 };
 
-function mapStateToProps({login}) {
-  const {error, user} = login;
-  return {error, user};
+function mapStateToProps({ login }) {
+  const { error, user } = login;
+  return { error, user };
 }
 
-export default connect(mapStateToProps, {sendbirdLogin})(Login);
+export default connect(mapStateToProps, { sendbirdLogin })(Login);
