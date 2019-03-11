@@ -1,44 +1,39 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @lint-ignore-every XPLATJSCOPYRIGHT1
- */
-
 import React, {Component} from "react";
-import {Platform, StyleSheet, View} from "react-native";
+import {createStackNavigator, createAppContainer} from "react-navigation";
 
-import {Text, Input, Button, ThemeProvider} from "react-native-elements";
+import Login from "./src/screens/Login";
+import Menu from "./src/screens/Menu";
 
-export default class App extends Component {
+import {Provider} from "react-redux";
+import store from "./src/store";
+
+const MainNavigator = createAppContainer(
+  createStackNavigator(
+    {
+      Login: {screen: Login, navigationOptions: () => ({header: null})},
+      Menu: {
+        screen: Menu,
+        navigationOptions: ({navigation}) => ({
+          title: "MENU"
+        })
+      }
+    },
+    {
+      defaultNavigationOptions: {
+        headerBackTitle: null
+      }
+    }
+  )
+);
+
+class App extends Component {
   render() {
     return (
-      <ThemeProvider>
-        <View style={styles.containerStyle}>
-          <View style={styles.containerStyle}>
-            <Input label="User ID" containerStyle={{width: 250}}/>
-          </View>
-          <View style={styles.containerStyle}>
-            <Input label="Nickname" containerStyle={{width: 250}}/>
-          </View>
-          <View style={styles.containerStyle}>
-            <Button title="Connect" type="outline" containerStyle={{width: 250}}/>
-          </View>
-          <View style={styles.containerStyle}>
-            {/* <FormValidationMessage>Error message</FormValidationMessage> */}
-          </View>
-        </View>
-      </ThemeProvider>
+      <Provider store={store}>
+        <MainNavigator />
+      </Provider>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  containerStyle: {
-    flex: 1,
-    backgroundColor: "#F5FCFF",
-    justifyContent: "center",
-    alignItems: "center"
-  }
-});
+export default App;
