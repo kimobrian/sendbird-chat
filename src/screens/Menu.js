@@ -94,6 +94,19 @@ class Menu extends Component {
           containerViewStyle={styles.menuViewStyle}
           buttonStyle={styles.buttonStyle}
           type="outline"
+          icon={{
+            name: "users",
+            type: "font-awesome",
+            color: "#aaa",
+            size: 16
+          }}
+          title="Other Users"
+          onPress={this._onGroupChannelPress}
+        />
+        <Button
+          containerViewStyle={styles.menuViewStyle}
+          buttonStyle={styles.buttonStyle}
+          type="outline"
           color="#6e5baa"
           icon={{
             name: "sign-out",

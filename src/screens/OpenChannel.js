@@ -1,24 +1,61 @@
 import React, { Component } from "react";
 import { View, FlatList } from "react-native";
 import { connect } from "react-redux";
-import { ListItem } from "react-native-elements";
 import TouchableScale from "react-native-touchable-scale";
 import LinearGradient from "react-native-linear-gradient";
-import { getOpenChannelList } from "../actions";
+import {
+  getOpenChannelList,
+  onOpenChannelPress,
+  clearSeletedOpenChannel
+} from "../actions";
 import { sbCreateOpenChannelListQuery } from "../sendbirdActions";
+import { ListItem, Button } from "../components";
 
 class OpenChannel extends Component {
-  static navigationOptions = {
-    title: "OPEN CHANNELS"
+  static navigationOptions = ({ navigation }) => {
+    const { params } = navigation.state;
+    return {
+      title: "Open Channel",
+      headerLeft: (
+        <Button
+          containerViewStyle={{ marginLeft: 0, marginRight: 0 }}
+          buttonStyle={{ paddingLeft: 14 }}
+          icon={{
+            name: "chevron-left",
+            type: "font-awesome",
+            color: "#7d62d9",
+            size: 18
+          }}
+          type="outline"
+          onPress={() => navigation.goBack()}
+        />
+      ),
+      headerRight: (
+        <Button
+          containerViewStyle={{ marginLeft: 0, marginRight: 0 }}
+          buttonStyle={{ paddingRight: 14 }}
+          icon={{
+            name: "plus",
+            type: "font-awesome",
+            color: "#7d62d9",
+            size: 18
+          }}
+          iconRight
+          type="outline"
+          onPress={() => {
+            navigation.navigate("OpenChannelCreate");
+          }}
+        />
+      )
+    };
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      refresh: false,
+      enterChannel: false,
       openChannelListQuery: null,
-      list: [],
-      openChannelList: []
+      list: props.list
     };
   }
 
@@ -27,20 +64,29 @@ class OpenChannel extends Component {
   }
 
   componentWillReceiveProps(props) {
-    const { list } = props;
-
-    if (list !== this.props.list) {
-      if (list.length === 0) {
-        this.setState({ list: [], openChannelList: []});
-      } else {
-        const newList = [...this.state.list, ...list];
-        this.setState({
-          list: newList,
-          openChannelList: newList
-        });
-      }
+    const { list, channel, createdChannel } = props;
+    console.log("Channle:::", channel);
+    if (createdChannel) {
+      const newList = [...[createdChannel], ...list];
+      this.setState({ list: newList }, () => {
+        this.props.clearCreatedOpenChannel();
+      });
+    }
+    if (channel) {
+      this.props.clearSeletedOpenChannel();
+      this.props.navigation.navigate("Chat", {
+        channelUrl: channel.url,
+        title: channel.name,
+        memberCount: channel.participantCount,
+        isOpenChannel: channel.isOpenChannel(),
+        _initListState: this._initEnterState
+      });
     }
   }
+
+  _initEnterState = () => {
+    this.setState({ enterChannel: false });
+  };
 
   _initOpenChannelList = () => {
     this._getOpenChannelList(true);
@@ -49,8 +95,9 @@ class OpenChannel extends Component {
   _getOpenChannelList = (init) => {
     if (init) {
       const openChannelListQuery = sbCreateOpenChannelListQuery();
-      this.setState({ openChannelListQuery }, () => {
-        this.props.getOpenChannelList(this.state.openChannelListQuery);
+      this.setState({ openChannelListQuery }, async () => {
+        await this.props.getOpenChannelList(this.state.openChannelListQuery);
+        this.setState({ list: this.props.list });
       });
     } else {
       this.props.getOpenChannelList(this.state.openChannelListQuery);
@@ -58,16 +105,20 @@ class OpenChannel extends Component {
   };
 
   _onListItemPress = (channelUrl) => {
-    // TODO: enter channel
-  };
-
-  _handleScroll = (e) => {
-    if (e.nativeEvent.contentOffset.y < -100 && !this.state.refresh) {
-      this.setState({ list: [], openChannelList: [], refresh: true }, () => {
-        this._initOpenChannelList();
+    if (!this.state.enterChannel) {
+      this.setState({ enterChannel: true }, () => {
+        this.props.onOpenChannelPress(channelUrl);
       });
     }
   };
+
+  // _handleScroll = (e) => {
+  //   if (e.nativeEvent.contentOffset.y < -100 && !this.state.refresh) {
+  //     this.setState({ list: [], openChannelList: [], refresh: true }, () => {
+  //       this._initOpenChannelList();
+  //     });
+  //   }
+  // };
 
   // _renderList = rowData => (
   //   <ListItem
@@ -89,7 +140,7 @@ class OpenChannel extends Component {
     return (
       <View>
         <FlatList
-          data={this.state.openChannelList}
+          data={this.props.list}
           renderItem={({ item }) => (
             <ListItem
               Component={TouchableScale}
@@ -107,6 +158,7 @@ class OpenChannel extends Component {
               chevron
               bottomDivider
               topDivider
+              onPress={() => this._onListItemPress(item.url)}
               keyExtractor={() => item.url}
               linearGradientProps={{
                 colors: ["#FF9800", "#F44336"],
@@ -115,6 +167,7 @@ class OpenChannel extends Component {
               }}
             />
           )}
+          keyExtractor={(item, index) => item.url}
         />
       </View>
     );
@@ -122,8 +175,19 @@ class OpenChannel extends Component {
 }
 
 function mapStateToProps({ openChannel }) {
-  const { list } = openChannel;
-  return { list };
+  const {
+    isLoading, list, createdChannel, channel
+  } = openChannel;
+  return {
+    isLoading,
+    list,
+    createdChannel,
+    channel
+  };
 }
 
-export default connect(mapStateToProps, { getOpenChannelList })(OpenChannel);
+export default connect(mapStateToProps, {
+  getOpenChannelList,
+  onOpenChannelPress,
+  clearSeletedOpenChannel
+})(OpenChannel);

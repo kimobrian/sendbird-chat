@@ -17,6 +17,7 @@ class Profile extends Component {
           name="ios-american-football"
           type="ionicon"
           color="#f50"
+          size={20}
           onPress={() => {
             params.handleSave();
           }}

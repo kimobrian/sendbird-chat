@@ -7,7 +7,7 @@ import { sendbirdLogin } from "../actions";
 
 class Login extends Component {
   static navigationOptions = {
-    title: "LOGIN",
+    title: "LOGIN"
   };
 
   constructor(props) {
@@ -15,7 +15,7 @@ class Login extends Component {
     this.state = {
       userId: "kimobrian254",
       nickname: "kimo",
-      error: "",
+      error: ""
     };
   }
 
@@ -37,7 +37,7 @@ class Login extends Component {
     if (user) {
       const resetAction = StackActions.reset({
         index: 0,
-        actions: [NavigationActions.navigate({ routeName: "Menu" })],
+        actions: [NavigationActions.navigate({ routeName: "Menu" })]
       });
       this.setState({ userId: "", nickname: "" }, () => {
         this.props.navigation.dispatch(resetAction);
@@ -68,6 +68,7 @@ class Login extends Component {
             errorStyle={{ color: "red" }}
             errorMessage={null}
             value={this.state.userId}
+            onChangeText={userId => this.setState({ userId })}
           />
         </View>
         <View style={styles.containerStyle}>
@@ -77,6 +78,7 @@ class Login extends Component {
             errorStyle={{ color: "red" }}
             errorMessage={null}
             value={this.state.nickname}
+            onChangeText={nickname => this.setState({ nickname })}
           />
         </View>
         <View style={styles.containerStyle}>
@@ -100,8 +102,8 @@ const styles = {
     marginTop: 10,
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-  },
+    alignItems: "center"
+  }
 };
 
 function mapStateToProps({ login }) {

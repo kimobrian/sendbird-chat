@@ -6,6 +6,7 @@ import Login from "./src/screens/Login";
 import Menu from "./src/screens/Menu";
 import Profile from "./src/screens/Profile";
 import OpenChannel from "./src/screens/OpenChannel";
+import Chat from "./src/screens/Chat";
 
 import store from "./src/store";
 
@@ -20,7 +21,8 @@ const MainNavigator = createAppContainer(
         })
       },
       Profile,
-      OpenChannel
+      OpenChannel,
+      Chat
     },
     {
       defaultNavigationOptions: {
